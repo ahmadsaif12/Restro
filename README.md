@@ -17,7 +17,7 @@ Base path: `/api/auth/`
 - `POST /login/` `{ "email": "...", "password": "..." }` -> JWT `access` + `refresh`
 - `POST /logout/` `{ "refresh": "..." }` (blacklists refresh token)
 - `POST /token/refresh/` `{ "refresh": "..." }`
-- `GET /me/` (Authorization: `Bearer <access>`)
+- `GET /profile/` (Authorization: `Bearer <access>`)
 - `GET /profile/<user_id>/` (Authorization: `Bearer <access>`)
 - `POST /password/forgot/` `{ "email": "...", "frontend_url": "https://..." (optional) }`
 - `POST /password/reset/confirm/` `{ "uid": "...", "token": "...", "new_password": "..." }`
@@ -27,6 +27,10 @@ Base path: `/api/auth/`
 - Swagger UI: `GET /api/docs/`
 - OpenAPI schema: `GET /api/schema/`
 - ReDoc: `GET /api/redoc/`
+
+## Admin Styling
+
+Admin CSS override lives in `static/admin/custom.css` and is loaded via `templates/admin/base_site.html`.
 
 ## Celery (Worker + Beat)
 

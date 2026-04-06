@@ -1,0 +1,34 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/custom.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div class="hm-dashboard">
+    <aside class="hm-sidebar">
+      <div class="hm-sidebar__title">{% trans "Dashboard" %}</div>
+      <div class="app-list">
+        {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+      </div>
+    </aside>
+
+    <main class="hm-main">
+      <section class="hm-hero">
+        <div class="hm-hero__title">{% trans "Welcome" %}</div>
+        <div class="hm-hero__subtitle">{% trans "Manage users, tasks, and your restaurant data from one place." %}</div>
+      </section>
+
+      <section class="hm-panels">
+        <div class="hm-panel">
+          {% if has_permission %}
+            {% include "admin/recent_actions.html" %}
+          {% endif %}
+        </div>
+      </section>
+    </main>
+  </div>
+{% endblock %}
+
