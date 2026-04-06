@@ -1,0 +1,81 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: dev
+    image: risingvoice:dev
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    environment:
+      ENVIRONMENT: dev
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${APP_HOST_PORT:-8000}:${APP_PORT:-8000}"
+    depends_on:
+      - db
+      - redis
+    entrypoint: ["bash", "-lc", "sed -i 's/\\r$//' ./scripts/start && bash ./scripts/start server"]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: dev
+    image: risingvoice:dev
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    environment:
+      ENVIRONMENT: dev
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    entrypoint: ["bash", "-lc", "celery -A handle_my_restore worker -l info"]
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: dev
+    image: risingvoice:dev
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    environment:
+      ENVIRONMENT: dev
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    entrypoint: ["bash", "-lc", "python manage.py migrate --noinput && celery -A handle_my_restore beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"]
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB: ${DB_NAME:-handle_my_restore}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+
+  redis:
+    image: redis:latest
+    env_file:
+      - ./.env
+
+volumes:
+  postgres_data_dev:

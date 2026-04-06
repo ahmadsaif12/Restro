@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -f "./scripts/base" ]]; then
+  # shellcheck source=/dev/null
+  source "./scripts/base"
+fi
+
+cmd="${1:-server}"
+
+export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-handle_my_restore.settings}"
+export APP_PORT="${APP_PORT:-8000}"
+
+run_wait_for_postgres() {
+  if declare -F wait_for_postgres >/dev/null 2>&1; then
+    wait_for_postgres
+  fi
+}
+
+case "$cmd" in
+  server)
+    run_wait_for_postgres
+    python manage.py migrate --noinput
+    python manage.py runserver "0.0.0.0:${APP_PORT}"
+    ;;
+  migrate)
+    run_wait_for_postgres
+    python manage.py migrate --noinput
+    ;;
+  *)
+    exec "$@"
+    ;;
+esac
