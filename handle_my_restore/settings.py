@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_celery_beat",
     "apps.autho.apps.AuthoConfig",
+    "apps.menu",
 ]
 
 MIDDLEWARE = [
