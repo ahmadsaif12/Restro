@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,21 +22,30 @@ DEBUG = env("DJANGO_DEBUG", "1") in {"1", "true", "True", "yes", "YES"}
 
 ALLOWED_HOSTS = [h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()]
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+
+THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "django_celery_beat",
+]
+
+#local apps
+LOCAL_APPS = [
     "apps.autho.apps.AuthoConfig",
     "apps.menu",
 ]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -95,6 +105,8 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+for directory in STATICFILES_DIRS:
+    os.makedirs(directory, exist_ok=True)
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom user
