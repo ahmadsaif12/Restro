@@ -9,13 +9,10 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Events
         fields = "__all__"
+        read_only_fields = ['created_at', 'updated_at', 'local_date', 'local_time']
 
     def get_local_date(self, obj):
-        if obj.date:
-            return timezone.localtime(timezone.make_aware(timezone.datetime.combine(obj.date, timezone.datetime.min.time()))).date()
-        return None
+        return obj.date 
 
     def get_local_time(self, obj):
-        if obj.time:
-            return obj.time  
-        return None
+        return obj.time
