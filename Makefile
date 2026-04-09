@@ -1,26 +1,29 @@
-.PHONY: help build up down restart logs shell migrate makemigrations createsuperuser fmt lint precommit-install precommit-run backup
+.PHONY: help build up down restart logs shell db-shell db-query migrate makemigrations createsuperuser fmt lint precommit-install precommit-run backup
 
 COMPOSE = docker compose --env-file .env
-DB_CONTAINER = db      # your postgres container name
+DB_CONTAINER = db
 DB_NAME = $(shell grep DB_NAME .env | cut -d '=' -f2)
 DB_USER = $(shell grep DB_USER .env | cut -d '=' -f2)
 DB_PASSWORD = $(shell grep DB_PASSWORD .env | cut -d '=' -f2)
 
 help:
 	@echo "Targets:"
-	@echo "  make up                Start containers"
-	@echo "  make build             Build app image"
-	@echo "  make down              Stop containers"
-	@echo "  make logs              Tail app logs"
-	@echo "  make shell             Bash into app container"
-	@echo "  make migrate           Run Django migrations"
-	@echo "  make makemigrations    Create migrations"
-	@echo "  make createsuperuser   Create admin user"
-	@echo "  make fmt               Format with black"
-	@echo "  make lint              Lint with flake8"
-	@echo "  make precommit-install Install git hooks"
-	@echo "  make precommit-run     Run pre-commit on all files"
-	@echo "  make backup            Backup all postgres data to a file"
+	@echo "  make up"
+	@echo "  make build"
+	@echo "  make down"
+	@echo "  make restart"
+	@echo "  make logs"
+	@echo "  make shell"
+	@echo "  make db-shell"
+	@echo "  make db-query q='SQL'"
+	@echo "  make migrate"
+	@echo "  make makemigrations"
+	@echo "  make createsuperuser"
+	@echo "  make fmt"
+	@echo "  make lint"
+	@echo "  make precommit-install"
+	@echo "  make precommit-run"
+	@echo "  make backup"
 
 build:
 	$(COMPOSE) build
@@ -38,6 +41,13 @@ logs:
 
 shell:
 	$(COMPOSE) exec app bash
+
+db-shell:
+	$(COMPOSE) exec -e PGPASSWORD=$(DB_PASSWORD) $(DB_CONTAINER) psql -U $(DB_USER) -d $(DB_NAME)
+
+db-query:
+	$(COMPOSE) exec -T -e PGPASSWORD=$(DB_PASSWORD) $(DB_CONTAINER) \
+	psql -U $(DB_USER) -d $(DB_NAME) -c "$(q)"
 
 migrate:
 	$(COMPOSE) exec app python manage.py migrate --noinput
@@ -60,8 +70,6 @@ precommit-install:
 precommit-run:
 	pre-commit run --all-files
 
-#backup databases 
 backup:
-	@echo "Backing up PostgreSQL database $(DB_NAME)..."
-	$(COMPOSE) exec -T $(DB_CONTAINER) pg_dump -U $(DB_USER) $(DB_NAME) > db_backup_$(shell date +%Y%m%d_%H%M%S).sql
-	@echo "Backup complete!"
+	$(COMPOSE) exec -T $(DB_CONTAINER) \
+	pg_dump -U $(DB_USER) $(DB_NAME) > db_backup_$(shell date +%Y%m%d_%H%M%S).sql
