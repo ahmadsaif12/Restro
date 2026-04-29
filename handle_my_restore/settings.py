@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-import os 
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def env(key: str, default: str | None = None) -> str:
-    import os
-
     value = os.environ.get(key, default)
     if value is None:
         raise RuntimeError(f"Missing required environment variable: {key}")
@@ -23,6 +21,8 @@ DEBUG = env("DJANGO_DEBUG", "1") in {"1", "true", "True", "yes", "YES"}
 ALLOWED_HOSTS = [h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()]
 
 DJANGO_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -37,7 +37,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "django_celery_beat",
-    "django_filters", 
+    "django_filters",
 ]
 
 #local apps
@@ -104,18 +104,20 @@ TIME_ZONE = env("DJANGO_TIME_ZONE", "UTC")
 USE_I18N = True
 USE_TZ = True
 
+#statics
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 for directory in STATICFILES_DIRS:
     os.makedirs(directory, exist_ok=True)
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Custom user
 AUTH_USER_MODEL = "autho.User"
 
-# DRF / JWT
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -124,17 +126,16 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
-    "DEFAULT_FILTER_BACKENDS": [         
+    "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
 }
-
-# Swagger / OpenAPI
+#swagger settings
 SPECTACULAR_SETTINGS = {
     "TITLE": "Handle My Restro API",
     "DESCRIPTION": "API documentation",
     "VERSION": "0.1.0",
-    "SERVE_INCLUDE_SCHEMA": False,  
+    "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SECURITY": [{"bearerAuth": []}],
     "APPEND_COMPONENTS": {
@@ -153,19 +154,17 @@ SPECTACULAR_SETTINGS = {
     },
     "ENUM_GENERATE_CHOICE_DESCRIPTION": False,
 }
-
-
+#jwt
 SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-# Email (password reset)
 EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = env("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@example.com")
 
-# Optional Redis cache
 REDIS_URL = env("REDIS_URL", "redis://redis:6379/0")
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -173,10 +172,60 @@ CACHES = {
     }
 }
 
-# Celery
+#celery configurations
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", REDIS_URL)
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", REDIS_URL)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+
+#django unfold for admin config
+UNFOLD = {
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Overview",
+                "separator": True,
+                "items": [
+                    {"title": "Dashboard", "icon": "dashboard", "link": "/admin/"},
+                    {"title": "Executive Dashboard", "icon": "bar_chart", "link": "/admin/executive-dashboard/"},
+                ],
+            },
+            {
+                "title": "Operations",
+                "separator": True,
+                "items": [
+                    {"title": "POS", "icon": "point_of_sale", "link": "/admin/pos/"},
+                    {"title": "Preboard", "icon": "table_restaurant", "link": "/admin/preboard/"},
+                    {"title": "Menu", "icon": "menu_book", "link": "/admin/menu/"},
+                    {"title": "Inventory", "icon": "inventory_2", "link": "/admin/inventory/"},
+                    {"title": "Orders", "icon": "receipt_long", "link": "/admin/orders/"},
+                    {"title": "Kitchen Recipes", "icon": "soup_kitchen", "link": "/admin/kitchen-recipes/"},
+                ],
+            },
+            {
+                "title": "Finance",
+                "separator": True,
+                "items": [
+                    {"title": "Expense", "icon": "payments", "link": "/admin/expense/"},
+                    {"title": "Calendar", "icon": "calendar_month", "link": "/admin/calendar/"},
+                    {"title": "Credits", "icon": "credit_score", "link": "/admin/credits/"},
+                    {"title": "Reports", "icon": "analytics", "link": "/admin/reports/"},
+                ],
+            },
+            {
+                "title": "Management",
+                "separator": True,
+                "items": [
+                    {"title": "Credit Management", "icon": "account_balance_wallet", "link": "/admin/credit-management/"},
+                    {"title": "Staff Management", "icon": "badge", "link": "/admin/staff/"},
+                    {"title": "Vendor Management", "icon": "local_shipping", "link": "/admin/vendors/"},
+                    {"title": "QR Menu", "icon": "qr_code_2", "link": "/admin/qr-menu/"},
+                ],
+            },
+        ],
+    }
+}

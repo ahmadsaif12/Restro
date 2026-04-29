@@ -1,0 +1,92 @@
+/* Branding and Layout */
+.submit-row div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.submit-row .form-group {
+    margin-bottom: 0;
+}
+
+.card-title {
+    float: none !important;
+}
+
+/* Form Focus States */
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #db3c3c !important;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1) !important;
+}
+
+/* Remove default browser outline */
+input,
+textarea,
+select {
+    outline: none !important;
+}
+
+/* TinyMCE Editor */
+.tox-edit-area__iframe {
+    cursor: text !important;
+}
+
+/* Brand Link - Side by Side Layout */
+.brand-link,
+a[href='/admin/'] {
+    display: flex !important;
+    align-items: center !important;
+    flex-direction: row !important;
+}
+
+.brand-link .brand-image,
+a[href='/admin/'] img {
+    opacity: 1 !important;
+    flex-shrink: 0;
+}
+
+.brand-title {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    font-size: 1rem !important;
+}
+
+/* Remove mr-4 class margin from logo image */
+.brand-link img.mr-4,
+a[href='/admin/'] img.mr-4 {
+    margin-right: 0 !important;
+}
+
+.login-logo img {
+    width: 200px;
+    height: 200px;
+}
+
+.max-w-2xl {
+    max-width: 100% !important;
+}
+
+
+
+
+
+
+.bg-cover {
+    background-color: white !important;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: flex;
+    justify-content: center;
+    background-position: center center;
+    display: none;
+    margin-top: 0;
+}
+
+
+@media (min-width: 1280px) {
+    .bg-cover {
+        display: block !important;
+    }
+}
