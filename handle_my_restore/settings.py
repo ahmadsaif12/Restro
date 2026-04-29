@@ -37,6 +37,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "django_celery_beat",
+    "django_filters", 
 ]
 
 #local apps
@@ -44,6 +45,7 @@ LOCAL_APPS = [
     "apps.autho.apps.AuthoConfig",
     "apps.menu",
     "apps.events",
+    "apps.inventory",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -122,6 +124,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "DEFAULT_FILTER_BACKENDS": [         
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
 }
 
 # Swagger / OpenAPI
@@ -129,7 +134,26 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Handle My Restro API",
     "DESCRIPTION": "API documentation",
     "VERSION": "0.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,  
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SECURITY": [{"bearerAuth": []}],
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    },
+    "ENUM_NAME_OVERRIDES": {
+        "InventoryUnitEnum": [
+            "kg", "g", "l", "ml", "pcs", "dozen", "box"
+        ],
+    },
+    "ENUM_GENERATE_CHOICE_DESCRIPTION": False,
 }
+
 
 SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,

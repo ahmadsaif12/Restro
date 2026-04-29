@@ -75,7 +75,7 @@ class ForgotPasswordView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
 
-        frontend_url = request.data.get("frontend_url")  # optional
+        frontend_url = request.data.get("frontend_url") 
         if frontend_url:
             reset_link = f"{frontend_url}?uid={uid}&token={token}"
         else:
@@ -130,16 +130,22 @@ class ResetPasswordConfirmView(APIView):
         user.save(update_fields=["password"])
         return Response({"detail": "Password updated"})
 
-
 class MeView(APIView):
-    @extend_schema(responses={200: UserSerializer})
+    @extend_schema(
+        summary="Get current logged in user profile",
+        operation_id="my_profile",
+        responses={200: UserSerializer}
+    )
     def get(self, request):
         user = request.user
         return Response(UserSerializer(user).data)
 
-
 class ProfileView(APIView):
-    @extend_schema(responses={200: UserSerializer})
+    @extend_schema(
+        summary="Get user profile by ID",
+        operation_id="user_profile_by_id",
+        responses={200: UserSerializer}
+    )
     def get(self, request, user_id: int):
         if request.user.id != user_id and not getattr(request.user, "is_staff", False):
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)

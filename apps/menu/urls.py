@@ -1,9 +1,16 @@
-from rest_framework.routers import DefaultRouter
-from .views import CategoryViewSet, MenuItemViewSet, TableViewSet
+from django.urls import path
+from .views import (
+    CategoryListView,
+    MenuItemListView,
+    MenuItemDetailView,
+    TableListView,
+    TableDetailView,
+)
 
-router = DefaultRouter()
-router.register(r'categories', CategoryViewSet, basename='category')
-router.register(r'menu-items', MenuItemViewSet, basename='menu-item')
-router.register(r'tables', TableViewSet, basename='table')
-
-urlpatterns = router.urls
+urlpatterns = [
+    path("categories/",       CategoryListView.as_view(),    name="menu-category-list"),
+    path("items/",            MenuItemListView.as_view(),    name="menu-item-list"),
+    path("items/<int:pk>/",   MenuItemDetailView.as_view(),  name="menu-item-detail"),
+    path("tables/",           TableListView.as_view(),       name="table-list"),
+    path("tables/<int:pk>/",  TableDetailView.as_view(),     name="table-detail"),
+]
