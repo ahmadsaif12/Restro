@@ -1,6 +1,6 @@
 from django.db import models
 
-class Events(models.Model):
+class Event(models.Model):
 
     EVENT_TYPE_CHOICES = [
         ("meeting", "Meeting"),

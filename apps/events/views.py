@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
 from django.utils import timezone
-from apps.events.models import Events
+from apps.events.models import Event
 from apps.events.serializers import EventSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -8,7 +8,7 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Events.objects.all().order_by("date", "time")
+        queryset = Event.objects.all().order_by("date", "time")
         filter_type = self.request.query_params.get("filter", "all")
         today = timezone.localdate()
 

@@ -9,3 +9,4 @@ django-celery-beat>=2.6,<3.0
 redis>=5.0,<6.0
 django-filter
 django-unfold>=0.30.0
+pillow==11.3.0

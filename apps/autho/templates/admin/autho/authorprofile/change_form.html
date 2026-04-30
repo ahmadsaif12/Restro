@@ -1,0 +1,206 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<style>
+    #name_translations-heading,
+    h3.group\/title {
+        display: none !important;
+    }
+
+    /* 🔴 HIDE LANGUAGE DROPDOWN FIELD COMPLETELY */
+    select[name*="lang"] {
+        display: none !important;
+    }
+
+    /* Clean input */
+    [id^="id_name_translations-"][id$="-name"] {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 6px !important;
+        padding: 8px !important;
+        width: 100% !important;
+        max-width: 600px !important;
+    }
+
+    .lang-switcher {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0 20px;
+    }
+
+    .lang-btn {
+        padding: 6px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #fff;
+    }
+
+    .lang-btn.active {
+        background: #dc2626;
+        color: #fff;
+        border-color: #dc2626;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const normalize = s => (s || "").toLowerCase().trim();
+
+        const getRows = () =>
+            Array.from(document.querySelectorAll(".inline-related"))
+                .filter(r => !r.classList.contains("empty-form"));
+
+        const getSelect = (row) =>
+            row.querySelector('select[name*="lang"]');
+
+        const getLanguages = () => {
+            const sample = document.querySelector('select[name*="lang"]');
+            if (!sample) return [];
+
+            return Array.from(sample.options)
+                .filter(o => o.value && o.value !== "--------")
+                .map(o => ({
+                    value: o.value,
+                    label: o.textContent.trim()
+                }));
+        };
+
+        const hideAdd = () => {
+            document.querySelectorAll("a,button").forEach(el => {
+                if ((el.textContent || "").toLowerCase().includes("add another"))
+                    el.style.display = "none";
+            });
+        };
+
+        const hideAllRows = () => {
+            getRows().forEach(r => r.style.display = "none");
+        };
+
+        const showLang = (value) => {
+            getRows().forEach(r => {
+                const sel = getSelect(r);
+                r.style.display = sel && sel.value === value ? "" : "none";
+            });
+
+            document.querySelectorAll(".lang-btn").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.value === value);
+            });
+        };
+
+        const ensureRow = (value) => {
+            const exists = getRows().find(r => {
+                const sel = getSelect(r);
+                return sel && sel.value === value;
+            });
+
+            if (exists) return showLang(value);
+
+            const addBtn = document.querySelector(".add-row a, .add-row button");
+            if (addBtn) addBtn.click();
+
+            setTimeout(() => {
+                const rows = getRows();
+                const newest = rows[rows.length - 1];
+                const sel = getSelect(newest);
+                if (sel) {
+                    sel.value = value;
+                    sel.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                showLang(value);
+            }, 200);
+        };
+
+        // ===== BUILD UI =====
+        const form = document.querySelector("#content-main form");
+        const container = document.createElement("div");
+        container.className = "lang-switcher";
+
+        const label = document.createElement("strong");
+        label.textContent = "Language:";
+        container.appendChild(label);
+
+        const langs = getLanguages();
+
+        // 🔥 FIX: detect by SYMBOL (EN / NE)
+        const EN = langs.find(l => normalize(l.label) === "en");
+        const NE = langs.find(l => normalize(l.label) === "ne");
+
+        // Buttons
+        [EN, NE].forEach(lang => {
+            if (!lang) return;
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = lang.label;
+            btn.className = "lang-btn";
+            btn.dataset.value = lang.value;
+
+            btn.onclick = () => ensureRow(lang.value);
+
+            container.appendChild(btn);
+        });
+
+        // Dropdown (exclude EN / NE)
+        const select = document.createElement("select");
+
+        const def = document.createElement("option");
+        def.textContent = "Other languages...";
+        def.value = "";
+        select.appendChild(def);
+
+        langs.forEach(lang => {
+            if (
+                normalize(lang.label) === "en" ||
+                normalize(lang.label) === "ne"
+            ) return;
+
+            const opt = document.createElement("option");
+            opt.value = lang.value;
+            opt.textContent = lang.label;
+            select.appendChild(opt);
+        });
+
+        select.onchange = () => {
+            if (select.value) ensureRow(select.value);
+        };
+
+        container.appendChild(select);
+        form.insertBefore(container, form.firstChild);
+
+        // Select2
+        if (window.jQuery) {
+            $(select).select2({
+                placeholder: "Search language...",
+                width: "250px"
+            });
+        }
+
+        // INIT
+        hideAdd();
+        hideAllRows();
+
+        if (EN) ensureRow(EN.value);
+
+    });
+</script>
+
+{% endblock %}
+
+{% block field_sets %}
+{% for inline_admin_formset in inline_admin_formsets %}
+{% include inline_admin_formset.opts.template %}
+{% endfor %}
+{% for fieldset in adminform %}
+{% include "admin/includes/fieldset.html" %}
+{% endfor %}
+{% endblock %}
+
+{% block inline_field_sets %}{% endblock %}
