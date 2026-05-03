@@ -1,0 +1,75 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    body.change-list {
+        background: #f8fafc !important;
+    }
+
+    #changelist {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 25px;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    /* Filter Sidebar */
+    #changelist-filter {
+        flex: 0 0 280px;
+        background: white !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 1.2rem !important;
+        position: sticky;
+        top: 20px;
+        overflow: hidden;
+    }
+
+    #changelist-filter h2 {
+        background: #0f172a;
+        color: white;
+        padding: 15px 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    #changelist-filter ul {
+        padding: 10px 15px;
+    }
+
+    #changelist-filter li a {
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: #64748b;
+        font-size: 14px;
+        display: block;
+    }
+
+    #changelist-filter li.selected a {
+        background: #f1f5f9;
+        color: #0f172a !important;
+        font-weight: 700;
+    }
+
+    /* Results Table */
+    .results {
+        flex: 1;
+        background: white;
+        border-radius: 1.2rem;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    #result_list thead th {
+        background: #f8fafc;
+        padding: 15px;
+        color: #475569;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}

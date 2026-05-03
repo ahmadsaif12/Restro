@@ -47,12 +47,14 @@ LOCAL_APPS = [
     "apps.events",
     "apps.inventory",
     "apps.misc",
+    "apps.orders",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -109,6 +111,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -136,7 +139,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Handle My Restro API",
     "DESCRIPTION": "API documentation",
     "VERSION": "0.1.0",
-    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_INCLUDE_SCHEMA":  False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SECURITY": [{"bearerAuth": []}],
     "APPEND_COMPONENTS": {
@@ -229,4 +232,14 @@ UNFOLD = {
             },
         ],
     }
+}
+
+#esewa settings
+
+ESEWA_SETTINGS = {
+    "MERCHANT_ID": "EPAYTEST",
+    "SECRET_KEY": "8gBm/:&EnhH.1/q",
+    "INITIATE_URL": "https://rc-epay.esewa.com.np/api/epay/main/v2/form",
+    "SUCCESS_URL": "http://localhost:8000/api/orders/esewa_success/",
+    "FAILURE_URL": "http://localhost:8000/api/orders/esewa_failure/",
 }
