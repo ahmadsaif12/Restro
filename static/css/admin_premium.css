@@ -1,0 +1,241 @@
+:root {
+    --primary: #ef4444;
+    --primary-dark: #dc2626;
+    --secondary: #1e40af;
+    --bg-main: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --border-color: rgba(226, 232, 240, 0.8);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --radius-xl: 1.5rem;
+    --radius-lg: 1rem;
+}
+
+body.change-form, body.change-list {
+    background: var(--bg-main) !important;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    color: var(--text-main);
+}
+
+/* Premium Container */
+.premium-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Premium Card */
+.premium-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-card:hover {
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+}
+
+/* Card Header */
+.premium-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.premium-card-title {
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: -0.025em;
+    color: var(--text-main);
+    background: linear-gradient(135deg, var(--text-main) 0%, #475569 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Modern Form Elements */
+.premium-inner-box {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0 !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.4) !important;
+}
+
+.form-row:last-child {
+    border-bottom: none !important;
+}
+
+.form-row label {
+    font-weight: 600 !important;
+    color: var(--text-main) !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 0.25rem;
+    float: none !important;
+}
+
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row input[type="email"],
+.form-row input[type="date"],
+.form-row input[type="time"],
+.form-row select,
+.form-row textarea,
+.vTextField {
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    background: #ffffff !important;
+    border: 1.5px solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+    outline: none !important;
+}
+
+/* Buttons */
+.premium-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none !important;
+    border: none;
+}
+
+.premium-btn-primary {
+    background: var(--primary);
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.premium-btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+}
+
+.premium-btn-outline {
+    background: white;
+    border: 1.5px solid var(--text-main);
+    color: var(--text-main) !important;
+}
+
+.premium-btn-outline:hover {
+    background: var(--text-main);
+    color: white !important;
+    transform: translateY(-2px);
+}
+
+/* Submit Row */
+.submit-row {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-color) !important;
+    padding: 1.5rem 2rem !important;
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
+    margin: 2rem -2.5rem -2.5rem -2.5rem !important;
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
+}
+
+.submit-row input {
+    margin: 0 !important;
+    height: auto !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Hide Django Defaults */
+.submit-row a.deletelink { display: none !important; }
+fieldset h2 { display: none !important; }
+
+/* Readonly Values */
+.readonly-value {
+    display: inline-block;
+    background: #f1f5f9;
+    padding: 0.5rem 1rem !important;
+    border-radius: 0.75rem;
+    font-size: 0.9rem !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color);
+    min-width: 100px;
+}
+
+/* Inlines */
+.inline-group {
+    background: transparent !important;
+    border: none !important;
+}
+
+.inline-group h2 {
+    display: block !important;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    padding: 0 0 1rem 0 !important;
+    border: none !important;
+}
+
+.inline-related {
+    background: white !important;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--border-color) !important;
+    overflow: hidden;
+    margin-bottom: 1.5rem !important;
+    box-shadow: var(--shadow-sm);
+}
+
+.inline-related h3 {
+    background: #f8fafc !important;
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}

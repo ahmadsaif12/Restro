@@ -1,0 +1,90 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/admin_premium.css' %}">
+<style>
+#changelist {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 1.5rem;
+  background: transparent;
+  border: none;
+  padding: 1rem;
+}
+
+#changelist-filter {
+  flex: 0 0 220px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  position: sticky;
+  top: 1.5rem;
+  height: fit-content;
+  overflow: hidden;
+}
+#changelist-filter h2 {
+  background: var(--accent-dark);
+  color: var(--accent-light);
+  padding: 0.875rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+#changelist-filter h3 {
+  padding: 0.75rem 1rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+#changelist-filter ul { list-style: none; padding: 0 0.5rem 0.75rem; }
+#changelist-filter li a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+#changelist-filter li a:hover { background: var(--surface-hover); color: var(--text-main); }
+#changelist-filter li.selected a {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.results {
+  flex: 1;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+#result_list { width: 100%; border-collapse: collapse; }
+#result_list thead th {
+  background: var(--surface-alt);
+  padding: 0.75rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+#result_list tbody tr:hover { background: var(--surface-hover); }
+#result_list td {
+  padding: 0.875rem 1rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border-color-light);
+  color: var(--text-main);
+}
+</style>
+{% endblock %}

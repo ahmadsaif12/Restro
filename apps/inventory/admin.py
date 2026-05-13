@@ -1,4 +1,5 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from .models import (
     InventoryCategory,
     InventoryItem,
@@ -8,13 +9,16 @@ from .models import (
 
 
 @admin.register(InventoryCategory)
-class InventoryCategoryAdmin(admin.ModelAdmin):
+class InventoryCategoryAdmin(ModelAdmin):
     list_display = ("name", "description")
     search_fields = ("name",)
 
+    def get_model_perms(self, request):
+        return {}
+
 
 @admin.register(InventoryItem)
-class InventoryItemAdmin(admin.ModelAdmin):
+class InventoryItemAdmin(ModelAdmin):
     list_display = (
         "name",
         "category",
@@ -34,7 +38,7 @@ class InventoryItemAdmin(admin.ModelAdmin):
 
 
 @admin.register(MenuItemIngredient)
-class MenuItemIngredientAdmin(admin.ModelAdmin):
+class MenuItemIngredientAdmin(ModelAdmin):
     list_display = (
         "menu_item",
         "inventory_item",
@@ -46,9 +50,12 @@ class MenuItemIngredientAdmin(admin.ModelAdmin):
         "inventory_item__name",
     )
 
+    def get_model_perms(self, request):
+        return {}
+
 
 @admin.register(StockTransaction)
-class StockTransactionAdmin(admin.ModelAdmin):
+class StockTransactionAdmin(ModelAdmin):
     list_display = (
         "inventory_item",
         "transaction_type",
@@ -59,3 +66,6 @@ class StockTransactionAdmin(admin.ModelAdmin):
     search_fields = ("inventory_item__name", "note")
     ordering = ("-created_at",)
     readonly_fields = ("created_at",)
+
+    def get_model_perms(self, request):
+        return {}

@@ -134,6 +134,7 @@ class AuthorNameTranslationInline(admin.StackedInline):
 class AuthorLanguageAdmin(ModelAdmin):
     list_display = ("title", "symbol", "created_at")
     search_fields = ("title", "symbol")
+
     def get_model_perms(self, request):
         return {}
 
@@ -142,5 +143,10 @@ class AuthorLanguageAdmin(ModelAdmin):
 class AuthorProfileAdmin(ModelAdmin):
     change_form_template = "admin/autho/authorprofile/change_form.html"
     list_display = ("user", "designation", "created_at")
-    search_fields = ("user__email", "user__first_name", "user__last_name", "designation")
+    search_fields = (
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+        "designation",
+    )
     inlines = [AuthorNameTranslationInline]

@@ -18,7 +18,9 @@ ENVIRONMENT = env("ENVIRONMENT", "dev")
 SECRET_KEY = env("DJANGO_SECRET_KEY", "dev-insecure-secret-key")
 DEBUG = env("DJANGO_DEBUG", "1") in {"1", "true", "True", "yes", "YES"}
 
-ALLOWED_HOSTS = [h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()]
+ALLOWED_HOSTS = [
+    h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()
+]
 
 DJANGO_APPS = [
     "unfold",
@@ -40,7 +42,7 @@ THIRD_PARTY_APPS = [
     "django_filters",
 ]
 
-#local apps
+# local apps
 LOCAL_APPS = [
     "apps.autho.apps.AuthoConfig",
     "apps.menu",
@@ -96,7 +98,9 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -107,7 +111,7 @@ TIME_ZONE = env("DJANGO_TIME_ZONE", "UTC")
 USE_I18N = True
 USE_TZ = True
 
-#statics
+# statics
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -127,19 +131,17 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
 }
-#swagger settings
+# swagger settings
 SPECTACULAR_SETTINGS = {
     "TITLE": "Handle My Restro API",
     "DESCRIPTION": "API documentation",
     "VERSION": "0.1.0",
-    "SERVE_INCLUDE_SCHEMA":  False,
+    "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SECURITY": [{"bearerAuth": []}],
     "APPEND_COMPONENTS": {
@@ -152,19 +154,19 @@ SPECTACULAR_SETTINGS = {
         }
     },
     "ENUM_NAME_OVERRIDES": {
-        "InventoryUnitEnum": [
-            "kg", "g", "l", "ml", "pcs", "dozen", "box"
-        ],
+        "InventoryUnitEnum": ["kg", "g", "l", "ml", "pcs", "dozen", "box"],
     },
     "ENUM_GENERATE_CHOICE_DESCRIPTION": False,
 }
-#jwt
+# jwt
 SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_BACKEND = env(
+    "DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
 DEFAULT_FROM_EMAIL = env("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@example.com")
 
 REDIS_URL = env("REDIS_URL", "redis://redis:6379/0")
@@ -176,7 +178,7 @@ CACHES = {
     }
 }
 
-#celery configurations
+# celery configurations
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", REDIS_URL)
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", REDIS_URL)
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -184,57 +186,113 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
-#django unfold for admin config
+# django unfold for admin config
 UNFOLD = {
+    "COLORS": {
+        "primary": {
+            "50": "254 242 242",  # Red shades - Primary color
+            "100": "254 226 226",
+            "200": "254 202 202",
+            "300": "252 165 165",
+            "400": "248 113 113",
+            "500": "239 68 68",  # Main Red
+            "600": "220 38 38",  # Dark Red
+            "700": "185 28 28",
+            "800": "153 27 27",
+            "900": "127 29 29",
+            "950": "69 10 10",
+        },
+        "danger": {
+            "50": "23 37 84",  # Dark Blue shades - Background color
+            "100": "30 58 138",
+            "200": "30 64 175",
+            "300": "29 78 216",
+            "400": "37 99 235",
+            "500": "30 64 175",  # Main Dark Blue
+            "600": "23 37 84",  # Darker Blue
+            "700": "15 23 42",  # Very Dark Blue
+            "800": "15 23 42",
+            "900": "15 23 42",
+            "950": "15 23 42",
+        },
+    },
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": False,
         "navigation": [
             {
-                "title": "Overview",
                 "separator": True,
                 "items": [
-                    {"title": "Dashboard", "icon": "dashboard", "link": "/admin/"},
-                    {"title": "Executive Dashboard", "icon": "bar_chart", "link": "/admin/executive-dashboard/"},
-                ],
-            },
-            {
-                "title": "Operations",
-                "separator": True,
-                "items": [
-                    {"title": "POS", "icon": "point_of_sale", "link": "/admin/pos/"},
-                    {"title": "Preboard", "icon": "table_restaurant", "link": "/admin/preboard/"},
                     {"title": "Menu", "icon": "menu_book", "link": "/admin/menu/"},
-                    {"title": "Inventory", "icon": "inventory_2", "link": "/admin/inventory/"},
-                    {"title": "Orders", "icon": "receipt_long", "link": "/admin/orders/"},
-                    {"title": "Kitchen Recipes", "icon": "soup_kitchen", "link": "/admin/kitchen-recipes/"},
+                    {
+                        "title": "Inventory",
+                        "icon": "inventory_2",
+                        "link": "/admin/inventory/",
+                    },
+                    {
+                        "title": "Orders",
+                        "icon": "receipt_long",
+                        "link": "/admin/orders/",
+                    },
+                    {
+                        "title": "Kitchen Recipes",
+                        "icon": "soup_kitchen",
+                        "link": "/admin/kitchen-recipes/",
+                    },
                 ],
             },
             {
-                "title": "Finance",
                 "separator": True,
                 "items": [
                     {"title": "Expense", "icon": "payments", "link": "/admin/expense/"},
-                    {"title": "Calendar", "icon": "calendar_month", "link": "/admin/calendar/"},
-                    {"title": "Credits", "icon": "credit_score", "link": "/admin/credits/"},
-                    {"title": "Reports", "icon": "analytics", "link": "/admin/reports/"},
+                    {
+                        "title": "Calendar",
+                        "icon": "calendar_month",
+                        "link": "/admin/calendar/",
+                    },
+                    {
+                        "title": "Credits",
+                        "icon": "credit_score",
+                        "link": "/admin/credits/",
+                    },
+                    {
+                        "title": "Reports",
+                        "icon": "analytics",
+                        "link": "/admin/reports/",
+                    },
                 ],
             },
-            {
-                "title": "Management",
-                "separator": True,
-                "items": [
-                    {"title": "Credit Management", "icon": "account_balance_wallet", "link": "/admin/credit-management/"},
-                    {"title": "Staff Management", "icon": "badge", "link": "/admin/staff/"},
-                    {"title": "Vendor Management", "icon": "local_shipping", "link": "/admin/vendors/"},
-                    {"title": "QR Menu", "icon": "qr_code_2", "link": "/admin/qr-menu/"},
-                ],
-            },
+            # {
+            #     "title": "Management",
+            #     "separator": True,
+            #     "items": [
+            #         {
+            #             "title": "Credit Management",
+            #             "icon": "account_balance_wallet",
+            #             "link": "/admin/credit-management/",
+            #         },
+            #         {
+            #             "title": "Staff Management",
+            #             "icon": "badge",
+            #             "link": "/admin/staff/",
+            #         },
+            #         {
+            #             "title": "Vendor Management",
+            #             "icon": "local_shipping",
+            #             "link": "/admin/vendors/",
+            #         },
+            #         {
+            #             "title": "QR Menu",
+            #             "icon": "qr_code_2",
+            #             "link": "/admin/qr-menu/",
+            #         },
+            #     ],
+            # },
         ],
-    }
+    },
 }
 
-#esewa settings
+# esewa settings
 
 ESEWA_SETTINGS = {
     "MERCHANT_ID": "EPAYTEST",
