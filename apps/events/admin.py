@@ -4,8 +4,6 @@ from .models import Event
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    change_form_template = "admin/events/change_form.html"
-    change_list_template = "admin/events/change_list.html"
     list_display = (
         "title",
         "date",
