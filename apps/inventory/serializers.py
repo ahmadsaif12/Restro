@@ -7,9 +7,14 @@ class InventoryCategorySerializer(serializers.ModelSerializer):
         model = InventoryCategory
         fields = "__all__"
 class InventoryItemSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field="slug", queryset=InventoryCategory.objects.all()
+    )
     category_name = serializers.CharField(source="category.name", read_only=True)
     is_low_stock = serializers.BooleanField(read_only=True)
-    total_value = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    total_value = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True
+    )
 
     class Meta:
         model = InventoryItem
@@ -67,6 +72,7 @@ class StockTransactionSerializer(serializers.ModelSerializer):
 
 # Read-only: show all ingredients for a given menu item
 class MenuItemWithIngredientsSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(slug_field="slug", read_only=True)
     ingredients = MenuItemIngredientSerializer(many=True, read_only=True)
     category_name = serializers.CharField(source="category.name", read_only=True)
 

@@ -27,7 +27,6 @@ ALLOWED_UPDATE_FIELDS = {"order_status", "payment_status", "table", "notes"}
 
 @extend_schema_view(
     list=extend_schema(
-        summary="List orders",
         parameters=[
             OpenApiParameter("order_status", str),
             OpenApiParameter("payment_status", str),
@@ -36,8 +35,8 @@ ALLOWED_UPDATE_FIELDS = {"order_status", "payment_status", "table", "notes"}
             OpenApiParameter("ordering", str),
         ],
     ),
-    retrieve=extend_schema(summary="Retrieve order"),
-    destroy=extend_schema(summary="Delete order"),
+    retrieve=extend_schema(),
+    destroy=extend_schema(),
 )
 class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -47,9 +46,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     search_fields = ["order_code", "user__username", "user__email"]
     ordering_fields = ["created_at", "total_amount"]
     ordering = ["-created_at"]
-    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
+    http_method_names = ["get", "post", "patch", "head", "options"]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Order.objects.none()
+
         user = self.request.user
         qs = (
             Order.objects.select_related("user", "table")
@@ -61,7 +63,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         return qs
 
     @extend_schema(
-        summary="Create order",
         request=OrderSerializer,
         responses={201: OrderSerializer},
     )
@@ -83,9 +84,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         )
 
     @extend_schema(
-        summary="Update order (allowed: order_status, payment_status, table, notes)",
         request=inline_serializer(
-            "OrderPutRequest",
+            "OrderPatchRequest",
             fields={
                 "order_status": serializers.CharField(required=False),
                 "payment_status": serializers.CharField(required=False),
@@ -98,7 +98,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             400: OpenApiResponse(description="No valid fields"),
         },
     )
-    def update(self, request, *args, **kwargs):
+    def partial_update(self, request, *args, **kwargs):
         order = self.get_object()
         filtered_data = {
             k: v for k, v in request.data.items() if k in ALLOWED_UPDATE_FIELDS
@@ -117,12 +117,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response({"message": "Order updated.", "order": serializer.data})
 
-    def partial_update(self, request, *args, **kwargs):
-        kwargs["partial"] = True
-        return self.update(request, *args, **kwargs)
-
     @extend_schema(
-        summary="Print KOT — returns pending items and marks them as Sent",
         responses={
             200: OpenApiResponse(description="KOT data with pending items"),
             400: OpenApiResponse(description="No pending items"),
@@ -164,95 +159,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         )
 
     @extend_schema(
-        summary="Get KOT preview — returns pending items without changing status",
-        responses={200: OpenApiResponse(description="Pending KOT items")},
-    )
-    @action(detail=True, methods=["get"], url_path="kot_preview")
-    def kot_preview(self, request, pk=None):
-        order = self.get_object()
-        pending_items = order.items.filter(kot_status="Pending")
-        return Response(
-            {
-                "order_code": f"ORD-{order.order_code}",
-                "table": str(order.table),
-                "waiter": order.user.get_full_name() or order.user.username
-                if order.user
-                else "—",
-                "pending_items": OrderItemSerializer(pending_items, many=True).data,
-                "total_pending": pending_items.count(),
-            }
-        )
-
-    @extend_schema(
-        summary="Mark items as Prepared — kitchen marks sent items as done",
-        responses={
-            200: OrderSerializer,
-            400: OpenApiResponse(description="No sent items to prepare"),
-        },
-    )
-    @action(detail=True, methods=["post"], url_path="mark_prepared")
-    def mark_prepared(self, request, pk=None):
-        order = self.get_object()
-        sent_items = order.items.filter(kot_status="Sent")
-
-        if not sent_items.exists():
-            return Response(
-                {"error": "No sent items to mark as prepared."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        sent_items.update(kot_status="Prepared")
-
-        # Auto-update order status to Ready if all items are prepared
-        if not order.items.filter(kot_status__in=["Pending", "Sent"]).exists():
-            order.order_status = "Ready"
-            order.save(update_fields=["order_status"])
-
-        return Response(
-            {
-                "message": "Items marked as prepared.",
-                "order": OrderSerializer(order).data,
-            }
-        )
-
-    @extend_schema(
-        summary="Update a single order item's kot_status",
-        request=inline_serializer(
-            "KotStatusRequest",
-            fields={
-                "kot_status": serializers.ChoiceField(
-                    choices=["Pending", "Sent", "Prepared"]
-                ),
-            },
-        ),
-        responses={
-            200: OpenApiResponse(description="Item updated"),
-            404: OpenApiResponse(description="Item not found"),
-        },
-    )
-    @action(
-        detail=True, methods=["patch"], url_path="items/(?P<item_id>[^/.]+)/kot_status"
-    )
-    def update_item_kot_status(self, request, pk=None, item_id=None):
-        order = self.get_object()
-        item = get_object_or_404(OrderItem, pk=item_id, order=order)
-        new_status = request.data.get("kot_status")
-        if new_status not in ["Pending", "Sent", "Prepared"]:
-            return Response(
-                {"error": "Invalid kot_status. Choose: Pending, Sent, Prepared."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        item.kot_status = new_status
-        item.save(update_fields=["kot_status"])
-        return Response(
-            {
-                "message": f"Item kot_status updated to {new_status}.",
-                "item": OrderItemSerializer(item).data,
-            }
-        )
-
-    @extend_schema(
-        summary="Initiate payment",
         responses={
             200: OpenApiResponse(description="Payment payload"),
             400: OpenApiResponse(description="Already paid"),
@@ -271,7 +177,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response({"message": "Payment payload ready.", **payment_data})
 
     @extend_schema(
-        summary="eSewa success callback",
         auth=[],
         parameters=[OpenApiParameter("data", str, required=True)],
         responses={
@@ -315,7 +220,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         )
 
     @extend_schema(
-        summary="eSewa failure callback",
         auth=[],
         parameters=[OpenApiParameter("transaction_uuid", str, required=False)],
         responses={402: OpenApiResponse(description="Payment failed")},

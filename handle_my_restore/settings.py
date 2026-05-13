@@ -34,6 +34,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -42,7 +43,6 @@ THIRD_PARTY_APPS = [
     "django_filters",
 ]
 
-# local apps
 LOCAL_APPS = [
     "apps.autho.apps.AuthoConfig",
     "apps.menu",
@@ -54,7 +54,9 @@ LOCAL_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
+# middleware configurations
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -85,6 +87,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "handle_my_restore.wsgi.application"
 ASGI_APPLICATION = "handle_my_restore.asgi.application"
 
+# db config
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -111,7 +114,6 @@ TIME_ZONE = env("DJANGO_TIME_ZONE", "UTC")
 USE_I18N = True
 USE_TZ = True
 
-# statics
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -136,7 +138,7 @@ REST_FRAMEWORK = {
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
 }
-# swagger settings
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Handle My Restro API",
     "DESCRIPTION": "API documentation",
@@ -158,11 +160,17 @@ SPECTACULAR_SETTINGS = {
     },
     "ENUM_GENERATE_CHOICE_DESCRIPTION": False,
 }
-# jwt
+
 SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
+
+# ✅ CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
 
 EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
@@ -178,7 +186,6 @@ CACHES = {
     }
 }
 
-# celery configurations
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", REDIS_URL)
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", REDIS_URL)
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -186,31 +193,31 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
-# django unfold for admin config
+# django admin panel config settings
 UNFOLD = {
     "COLORS": {
         "primary": {
-            "50": "254 242 242",  # Red shades - Primary color
+            "50": "254 242 242",
             "100": "254 226 226",
             "200": "254 202 202",
             "300": "252 165 165",
             "400": "248 113 113",
-            "500": "239 68 68",  # Main Red
-            "600": "220 38 38",  # Dark Red
+            "500": "239 68 68",
+            "600": "220 38 38",
             "700": "185 28 28",
             "800": "153 27 27",
             "900": "127 29 29",
             "950": "69 10 10",
         },
         "danger": {
-            "50": "23 37 84",  # Dark Blue shades - Background color
+            "50": "23 37 84",
             "100": "30 58 138",
             "200": "30 64 175",
             "300": "29 78 216",
             "400": "37 99 235",
-            "500": "30 64 175",  # Main Dark Blue
-            "600": "23 37 84",  # Darker Blue
-            "700": "15 23 42",  # Very Dark Blue
+            "500": "30 64 175",
+            "600": "23 37 84",
+            "700": "15 23 42",
             "800": "15 23 42",
             "900": "15 23 42",
             "950": "15 23 42",
@@ -262,38 +269,11 @@ UNFOLD = {
                     },
                 ],
             },
-            # {
-            #     "title": "Management",
-            #     "separator": True,
-            #     "items": [
-            #         {
-            #             "title": "Credit Management",
-            #             "icon": "account_balance_wallet",
-            #             "link": "/admin/credit-management/",
-            #         },
-            #         {
-            #             "title": "Staff Management",
-            #             "icon": "badge",
-            #             "link": "/admin/staff/",
-            #         },
-            #         {
-            #             "title": "Vendor Management",
-            #             "icon": "local_shipping",
-            #             "link": "/admin/vendors/",
-            #         },
-            #         {
-            #             "title": "QR Menu",
-            #             "icon": "qr_code_2",
-            #             "link": "/admin/qr-menu/",
-            #         },
-            #     ],
-            # },
         ],
     },
 }
 
-# esewa settings
-
+# payment setup
 ESEWA_SETTINGS = {
     "MERCHANT_ID": "EPAYTEST",
     "SECRET_KEY": "8gBm/:&EnhH.1/q",

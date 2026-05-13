@@ -1,4 +1,5 @@
 services:
+  # ── Backend (Django) ──
   app:
     build:
       context: .
@@ -15,11 +16,11 @@ services:
       DB_HOST: db
       REDIS_URL: redis://redis:6379/0
     ports:
-      - "${APP_HOST_PORT:-8002}:${APP_PORT:-8000}"
+      - "${APP_HOST_PORT:-8002}:${APP_PORT:-8000}" # ✅ host:container fixed
     depends_on:
       - db
       - redis
-    entrypoint: ["bash", "-lc", "sed -i 's/\\r$//' ./scripts/start && bash ./scripts/start server"]
+    entrypoint: [ "bash", "-lc", "sed -i 's/\\r$//' ./scripts/start && bash ./scripts/start server" ]
 
   worker:
     build:
@@ -39,7 +40,7 @@ services:
     depends_on:
       - db
       - redis
-    entrypoint: ["bash", "-lc", "celery -A handle_my_restore worker -l info"]
+    entrypoint: [ "bash", "-lc", "celery -A handle_my_restore worker -l info" ]
 
   beat:
     build:
@@ -59,8 +60,22 @@ services:
     depends_on:
       - db
       - redis
-    entrypoint: ["bash", "-lc", "python manage.py migrate --noinput && celery -A handle_my_restore beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"]
+    entrypoint: [ "bash", "-lc", "python manage.py migrate --noinput && celery -A handle_my_restore beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler" ]
 
+  # ── Frontend (Next.js) ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:${APP_HOST_PORT:-8002}/api
+    image: handle_my_restro_frontend:dev
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:3000"
+    depends_on:
+      - app
+
+  # ── Infrastructure ──
   db:
     image: postgres:15
     volumes:

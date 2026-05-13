@@ -11,3 +11,4 @@ django-filter
 django-unfold>=0.30.0
 pillow==11.3.0
 whitenoise
+django-cors-headers>=4.3,<5.0  

@@ -10,8 +10,8 @@ from .models import (
 
 @admin.register(InventoryCategory)
 class InventoryCategoryAdmin(ModelAdmin):
-    list_display = ("name", "description")
-    search_fields = ("name",)
+    list_display = ("name","slug")
+    search_fields = ("name","slug")
 
     def get_model_perms(self, request):
         return {}

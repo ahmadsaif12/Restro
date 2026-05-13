@@ -7,69 +7,110 @@ from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
     inline_serializer,
-    OpenApiResponse
+    OpenApiResponse,
 )
 
-from .models import InventoryItem
-from .serializers import InventoryItemSerializer
+from .models import InventoryItem, InventoryCategory
+from .serializers import InventoryItemSerializer, InventoryCategorySerializer
 
 
 def not_found():
     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
+class InventoryCategoryListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+
+    @extend_schema(
+        request=InventoryCategorySerializer,
+        responses={201: InventoryCategorySerializer},
+    )
+    def post(self, request):
+        serializer = InventoryCategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InventoryCategoryDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, slug):
+        try:
+            return InventoryCategory.objects.get(slug=slug)
+        except InventoryCategory.DoesNotExist:
+            return None
+
+    @extend_schema(
+        responses={200: InventoryCategorySerializer},
+    )
+    def get(self, request, slug):
+        obj = self.get_object(slug)
+        if not obj:
+            return not_found()
+        return Response(InventoryCategorySerializer(obj).data)
+
+
 class InventoryDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        summary="Inventory dashboard summary cards",
         responses=inline_serializer(
             name="InventoryDashboardResponse",
             fields={
                 "total_items": serializers.IntegerField(),
                 "low_stock_alerts": serializers.IntegerField(),
                 "total_inventory_value": serializers.FloatField(),
-            }
-        )
+            },
+        ),
     )
     def get(self, request):
         items = InventoryItem.objects.all()
-        total_value = items.aggregate(
-            total=Sum(F("current_stock") * F("unit_cost"))
-        )["total"] or 0
+        total_value = (
+            items.aggregate(total=Sum(F("current_stock") * F("unit_cost")))["total"]
+            or 0
+        )
 
-        return Response({
-            "total_items": items.count(),
-            "low_stock_alerts": sum(1 for i in items if i.is_low_stock),
-            "total_inventory_value": round(total_value, 2),
-        })
+        return Response(
+            {
+                "total_items": items.count(),
+                "low_stock_alerts": sum(1 for i in items if i.is_low_stock),
+                "total_inventory_value": round(total_value, 2),
+            }
+        )
 
 
 class InventoryItemView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        summary="List all inventory items",
         parameters=[
+            OpenApiParameter("search", str, description="Search by name or supplier"),
+            OpenApiParameter("category", str, description="Filter by category slug"),
             OpenApiParameter(
-                "search", str,
-                description="Search by name or supplier"
-            ),
-            OpenApiParameter(
-                "unit", str,
+                "unit",
+                str,
                 description="Filter by unit",
-                enum=["kg", "g", "l", "ml", "pcs", "dozen", "box"]
+                enum=["kg", "g", "l", "ml", "pcs", "dozen", "box"],
             ),
         ],
-        responses=InventoryItemSerializer(many=True)
+        responses=InventoryItemSerializer(many=True),
     )
     def get(self, request):
         qs = InventoryItem.objects.select_related("category").all()
         search = request.query_params.get("search")
+        category = request.query_params.get("category")
         unit = request.query_params.get("unit")
 
         if search:
-            qs = qs.filter(name__icontains=search) | qs.filter(supplier__icontains=search)
+            qs = qs.filter(name__icontains=search) | qs.filter(
+                supplier__icontains=search
+            )
+
+        if category:
+            qs = qs.filter(category__slug=category)
 
         if unit:
             qs = qs.filter(unit=unit)
@@ -77,20 +118,25 @@ class InventoryItemView(APIView):
         return Response(InventoryItemSerializer(qs, many=True).data)
 
     @extend_schema(
-        summary="Add new inventory item",
         request=inline_serializer(
             name="InventoryItemCreateRequest",
             fields={
                 "name": serializers.CharField(),
-                "category": serializers.CharField(help_text="e.g. Meat, Dairy, Vegetables"),
-                "unit": serializers.ChoiceField(choices=["kg", "g", "l", "ml", "pcs", "dozen", "box"]),
-                "current_stock": serializers.DecimalField(max_digits=10, decimal_places=3),
+                "category": serializers.CharField(
+                    help_text="e.g. Meat, Dairy, Vegetables"
+                ),
+                "unit": serializers.ChoiceField(
+                    choices=["kg", "g", "l", "ml", "pcs", "dozen", "box"]
+                ),
+                "current_stock": serializers.DecimalField(
+                    max_digits=10, decimal_places=3
+                ),
                 "min_stock": serializers.DecimalField(max_digits=10, decimal_places=3),
                 "unit_cost": serializers.DecimalField(max_digits=10, decimal_places=2),
                 "supplier": serializers.CharField(required=False, allow_blank=True),
-            }
+            },
         ),
-        responses=InventoryItemSerializer
+        responses=InventoryItemSerializer,
     )
     def post(self, request):
         serializer = InventoryItemSerializer(data=request.data)
@@ -111,7 +157,6 @@ class InventoryItemDetailView(APIView):
             return None
 
     @extend_schema(
-        summary="Update inventory item",
         request=inline_serializer(
             name="InventoryItemUpdateRequest",
             fields={
@@ -119,15 +164,21 @@ class InventoryItemDetailView(APIView):
                 "category": serializers.CharField(required=False),
                 "unit": serializers.ChoiceField(
                     choices=["kg", "g", "l", "ml", "pcs", "dozen", "box"],
-                    required=False
+                    required=False,
                 ),
-                "current_stock": serializers.DecimalField(max_digits=10, decimal_places=3, required=False),
-                "min_stock": serializers.DecimalField(max_digits=10, decimal_places=3, required=False),
-                "unit_cost": serializers.DecimalField(max_digits=10, decimal_places=2, required=False),
+                "current_stock": serializers.DecimalField(
+                    max_digits=10, decimal_places=3, required=False
+                ),
+                "min_stock": serializers.DecimalField(
+                    max_digits=10, decimal_places=3, required=False
+                ),
+                "unit_cost": serializers.DecimalField(
+                    max_digits=10, decimal_places=2, required=False
+                ),
                 "supplier": serializers.CharField(required=False, allow_blank=True),
-            }
+            },
         ),
-        responses=InventoryItemSerializer
+        responses=InventoryItemSerializer,
     )
     def put(self, request, pk):
         obj = self.get_object(pk)
@@ -142,10 +193,7 @@ class InventoryItemDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        summary="Delete inventory item",
-        responses={
-            204: OpenApiResponse(description="No Content")
-        }
+        responses={204: OpenApiResponse(description="No Content")},
     )
     def delete(self, request, pk):
         obj = self.get_object(pk)

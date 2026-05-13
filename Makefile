@@ -1,4 +1,4 @@
-.PHONY: help build up down restart logs shell db-shell db-query migrate makemigrations createsuperuser fmt lint precommit-install precommit-run backup
+.PHONY: help build up down restart logs shell db-shell db-query migrate makemigrations createsuperuser fmt lint precommit-install precommit-run backup frontend-logs frontend-shell
 
 COMPOSE = docker compose --env-file .env
 DB_CONTAINER = db
@@ -8,13 +8,15 @@ DB_PASSWORD = $(shell grep DB_PASSWORD .env | cut -d '=' -f2)
 
 help:
 	@echo "Targets:"
-	@echo "  make up"
-	@echo "  make build"
-	@echo "  make down"
-	@echo "  make restart"
-	@echo "  make logs"
-	@echo "  make shell"
-	@echo "  make db-shell"
+	@echo "  make up              - Start all services"
+	@echo "  make build           - Build all images"
+	@echo "  make down            - Stop all services"
+	@echo "  make restart         - Restart all services"
+	@echo "  make logs            - Tail backend logs"
+	@echo "  make frontend-logs   - Tail frontend logs"
+	@echo "  make shell           - Open backend shell"
+	@echo "  make frontend-shell  - Open frontend shell"
+	@echo "  make db-shell        - Open database shell"
 	@echo "  make db-query q='SQL'"
 	@echo "  make migrate"
 	@echo "  make makemigrations"
@@ -73,3 +75,9 @@ precommit-run:
 backup:
 	$(COMPOSE) exec -T $(DB_CONTAINER) \
 	pg_dump -U $(DB_USER) $(DB_NAME) > db_backup_$(shell date +%Y%m%d_%H%M%S).sql
+
+frontend-logs:
+	$(COMPOSE) logs -f frontend
+
+frontend-shell:
+	$(COMPOSE) exec frontend sh

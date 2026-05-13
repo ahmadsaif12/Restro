@@ -7,6 +7,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MenuItemSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(slug_field='slug', queryset=Category.objects.all())
     category_name = serializers.CharField(source='category.name', read_only=True)
 
     class Meta:

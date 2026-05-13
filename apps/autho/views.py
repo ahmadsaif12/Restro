@@ -36,7 +36,11 @@ class RegisterView(APIView):
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
         return Response(
-            {"user": UserSerializer(user).data, "refresh": str(refresh), "access": str(refresh.access_token)},
+            {
+                "user": UserSerializer(user).data,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            },
             status=status.HTTP_201_CREATED,
         )
 
@@ -51,7 +55,11 @@ class LoginView(APIView):
         user = serializer.validated_data["user"]
         refresh = RefreshToken.for_user(user)
         return Response(
-            {"user": UserSerializer(user).data, "refresh": str(refresh), "access": str(refresh.access_token)}
+            {
+                "user": UserSerializer(user).data,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
         )
 
 
@@ -60,7 +68,9 @@ class ForgotPasswordView(APIView):
 
     @extend_schema(
         request=ForgotPasswordSerializer,
-        responses={200: OpenApiResponse(description="If email exists, reset link was sent.")},
+        responses={
+            200: OpenApiResponse(description="If email exists, reset link was sent.")
+        },
     )
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -75,7 +85,7 @@ class ForgotPasswordView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
 
-        frontend_url = request.data.get("frontend_url") 
+        frontend_url = request.data.get("frontend_url")
         if frontend_url:
             reset_link = f"{frontend_url}?uid={uid}&token={token}"
         else:
@@ -93,7 +103,10 @@ class ForgotPasswordView(APIView):
 
 
 class LogoutView(APIView):
-    @extend_schema(request=LogoutSerializer, responses={200: OpenApiResponse(description="Logged out")})
+    @extend_schema(
+        request=LogoutSerializer,
+        responses={200: OpenApiResponse(description="Logged out")},
+    )
     def post(self, request):
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -121,31 +134,30 @@ class ResetPasswordConfirmView(APIView):
         try:
             user = serializer.get_user()
         except User.DoesNotExist:
-            return Response({"detail": "Invalid uid"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid uid"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         if not token_generator.check_token(user, token):
-            return Response({"detail": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid or expired token"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user.set_password(new_password)
         user.save(update_fields=["password"])
         return Response({"detail": "Password updated"})
 
+
 class MeView(APIView):
-    @extend_schema(
-        summary="Get current logged in user profile",
-        operation_id="my_profile",
-        responses={200: UserSerializer}
-    )
+    @extend_schema(operation_id="my_profile", responses={200: UserSerializer})
     def get(self, request):
         user = request.user
         return Response(UserSerializer(user).data)
 
+
 class ProfileView(APIView):
-    @extend_schema(
-        summary="Get user profile by ID",
-        operation_id="user_profile_by_id",
-        responses={200: UserSerializer}
-    )
+    @extend_schema(operation_id="user_profile_by_id", responses={200: UserSerializer})
     def get(self, request, user_id: int):
         if request.user.id != user_id and not getattr(request.user, "is_staff", False):
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
