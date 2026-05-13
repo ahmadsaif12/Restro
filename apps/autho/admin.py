@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.html import format_html
 
-from apps.autho.models import AuthorProfile, AuthorLanguage, AuthorNameTranslation
+from apps.autho.models import AuthorProfile
 from unfold.admin import ModelAdmin
 
 User = get_user_model()
@@ -111,42 +111,3 @@ class UserAdmin(ModelAdmin, BaseUserAdmin):
         return "N/A"
 
     avatar_preview.short_description = "Photo"
-
-
-class AuthorNameTranslationInline(admin.StackedInline):
-    model = AuthorNameTranslation
-    extra = 1
-    autocomplete_fields = ["lang"]
-    fieldsets = (
-        (
-            "Author Name",
-            {
-                "fields": ("lang", "name"),
-            },
-        ),
-    )
-
-    def get_model_perms(self, request):
-        return {}
-
-
-@admin.register(AuthorLanguage)
-class AuthorLanguageAdmin(ModelAdmin):
-    list_display = ("title", "symbol", "created_at")
-    search_fields = ("title", "symbol")
-
-    def get_model_perms(self, request):
-        return {}
-
-
-@admin.register(AuthorProfile)
-class AuthorProfileAdmin(ModelAdmin):
-    change_form_template = "admin/autho/authorprofile/change_form.html"
-    list_display = ("user", "designation", "created_at")
-    search_fields = (
-        "user__email",
-        "user__first_name",
-        "user__last_name",
-        "designation",
-    )
-    inlines = [AuthorNameTranslationInline]

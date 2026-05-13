@@ -4,8 +4,11 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from apps.misc.models import BaseModel
 
+
 class UserManager(BaseUserManager["User"]):
-    def create_user(self, email: str, password: str | None = None, **extra_fields) -> "User":
+    def create_user(
+        self, email: str, password: str | None = None, **extra_fields
+    ) -> "User":
         if not email:
             raise ValueError("Email is required")
         email = self.normalize_email(email)
@@ -17,7 +20,9 @@ class UserManager(BaseUserManager["User"]):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email: str, password: str | None = None, **extra_fields) -> "User":
+    def create_superuser(
+        self, email: str, password: str | None = None, **extra_fields
+    ) -> "User":
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
@@ -29,6 +34,7 @@ class UserManager(BaseUserManager["User"]):
 
         return self.create_user(email=email, password=password, **extra_fields)
 
+
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         WAITER = "waiter", "Waiter"
@@ -37,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255, blank=True)
-    role = models.CharField(max_length=20, choices=Role.choices,default="admin")
+    role = models.CharField(max_length=20, choices=Role.choices, default="admin")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -48,6 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return self.email
+
 
 class AuthorProfile(BaseModel):
     user = models.OneToOneField(
@@ -60,39 +67,3 @@ class AuthorProfile(BaseModel):
 
     def __str__(self):
         return f"{self.user.email} profile"
-
-
-class AuthorLanguage(BaseModel):
-    title = models.CharField(max_length=100)
-    symbol = models.CharField(max_length=10, unique=True, db_index=True)
-
-    class Meta:
-        verbose_name = "Author Language"
-        verbose_name_plural = "Author Languages"
-        ordering = ["title"]
-
-    def __str__(self):
-        return self.symbol
-
-
-class AuthorNameTranslation(BaseModel):
-    author = models.ForeignKey(
-        AuthorProfile, on_delete=models.CASCADE, related_name="name_translations"
-    )
-    lang = models.ForeignKey(
-        AuthorLanguage,
-        on_delete=models.CASCADE,
-        related_name="author_name_translations",
-    )
-    name = models.CharField(max_length=255)
-
-    class Meta:
-        verbose_name = "Author Name"
-        verbose_name_plural = "Author Names"
-        unique_together = ("author", "lang")
-        indexes = [
-            models.Index(fields=["author", "lang"]),
-        ]
-
-    def __str__(self):
-        return f"{self.author_id} - {self.lang.symbol}"
