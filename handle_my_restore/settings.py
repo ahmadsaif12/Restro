@@ -195,6 +195,9 @@ CELERY_TIMEZONE = TIME_ZONE
 
 # django admin panel config settings
 UNFOLD = {
+    "SITE_TITLE": "Handle My Restro",
+    "SITE_HEADER": "Handle My Restro",
+    "SITE_URL": "https://thehandlemyrestro.com",
     "COLORS": {
         "primary": {
             "50": "254 242 242",
@@ -253,9 +256,9 @@ UNFOLD = {
                 "items": [
                     {"title": "Expense", "icon": "payments", "link": "/admin/expense/"},
                     {
-                        "title": "Calendar",
+                        "title": "Events",
                         "icon": "calendar_month",
-                        "link": "/admin/calendar/",
+                        "link": "/admin/events/",
                     },
                     {
                         "title": "Credits",

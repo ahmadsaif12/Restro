@@ -1,0 +1,171 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <style>
+    body.change-list .main {
+      background:
+        radial-gradient(circle at top left, rgba(14, 116, 144, 0.08), transparent 28rem),
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    }
+
+    .calendar-admin { color: #0f172a; }
+
+    .calendar-admin__hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+      gap: 1rem;
+      margin: 0 0 1.25rem;
+      padding: 1.4rem 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 1.5rem;
+      background: linear-gradient(135deg, #0f766e 0%, #155e75 46%, #1d4ed8 100%);
+      color: #f8fafc;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+    }
+
+    .calendar-admin__eyebrow {
+      margin: 0 0 0.35rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.72;
+      font-weight: 700;
+    }
+
+    .calendar-admin__hero h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 2vw, 2.2rem);
+      line-height: 1.05;
+    }
+
+    .calendar-admin__hero p {
+      margin: 0.6rem 0 0;
+      max-width: 42rem;
+      color: rgba(248, 250, 252, 0.84);
+      line-height: 1.55;
+    }
+
+    .calendar-admin__actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+    }
+
+    .calendar-admin__button,
+    .object-tools a.calendar-admin__button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 2.9rem;
+      padding: 0.8rem 1rem;
+      border: 0;
+      border-radius: 999px;
+      background: #f8fafc;
+      color: #0f172a !important;
+      font-weight: 700;
+      text-decoration: none !important;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+    }
+
+    .calendar-admin__stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin: 0 0 1.25rem;
+    }
+
+    .calendar-admin__stat {
+      padding: 1rem 1.1rem;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 1.1rem;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+      backdrop-filter: blur(8px);
+    }
+
+    .calendar-admin__stat-label {
+      display: block;
+      color: #475569;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .calendar-admin__stat-value {
+      display: block;
+      margin-top: 0.35rem;
+      color: #0f172a;
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    #changelist {
+      padding: 1.2rem;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 1.4rem;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+    }
+
+    #changelist .paginator,
+    #changelist .xfull { border-radius: 1rem; }
+    #changelist table thead th { background: #f8fafc; }
+    #changelist table tbody tr:nth-child(even) { background: rgba(248, 250, 252, 0.7); }
+
+    #changelist-filter {
+      border-left: 1px solid #e2e8f0;
+      padding-left: 1rem;
+    }
+
+    #changelist .actions { display: none !important; }
+
+    @media (max-width: 1100px) {
+      .calendar-admin__hero,
+      .calendar-admin__stats { grid-template-columns: 1fr; }
+      .calendar-admin__actions { justify-content: flex-start; }
+    }
+  </style>
+{% endblock %}
+
+{% block object-tools-items %}
+  <li>
+    <a href="{{ import_url }}" class="calendar-admin__button">Import JSON</a>
+  </li>
+  {{ block.super }}
+{% endblock %}
+
+{% block content_title %}
+  <div class="calendar-admin">
+    <div class="calendar-admin__hero">
+      <div>
+        <p class="calendar-admin__eyebrow">Event Management</p>
+        <h1>Events</h1>
+        <p>Manage events and import structured event files without editing rows one by one.</p>
+      </div>
+      <div class="calendar-admin__actions">
+        <a href="{{ import_url }}" class="calendar-admin__button">Upload events JSON</a>
+      </div>
+    </div>
+    <div class="calendar-admin__stats">
+      <div class="calendar-admin__stat">
+        <span class="calendar-admin__stat-label">Total events</span>
+        <span class="calendar-admin__stat-value">{{ event_stats.total_events }}</span>
+      </div>
+      <div class="calendar-admin__stat">
+        <span class="calendar-admin__stat-label">Confirmed</span>
+        <span class="calendar-admin__stat-value">{{ event_stats.confirmed_events }}</span>
+      </div>
+      <div class="calendar-admin__stat">
+        <span class="calendar-admin__stat-label">Pending</span>
+        <span class="calendar-admin__stat-value">{{ event_stats.pending_events }}</span>
+      </div>
+      <div class="calendar-admin__stat">
+        <span class="calendar-admin__stat-label">Cancelled</span>
+        <span class="calendar-admin__stat-value">{{ event_stats.cancelled_events }}</span>
+      </div>
+    </div>
+  </div>
+{% endblock %}

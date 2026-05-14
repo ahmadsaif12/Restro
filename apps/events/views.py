@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum
-from datetime import date
+from django.utils import timezone
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
@@ -49,8 +49,8 @@ from .serializers import EventSerializer, EventSummarySerializer
                 name="Staff Training Example",
                 value={
                     "title": "Staff Training",
-                    "date": "2026-05-14",
-                    "time": "15:00:00",
+                    "start_datetime": "2026-05-14T15:00:00",
+                    "end_datetime": "2026-05-14T17:00:00",
                     "event_type": "meeting",
                     "priority": "medium",
                     "location": "Training Room",
@@ -82,25 +82,20 @@ from .serializers import EventSerializer, EventSummarySerializer
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    http_method_names = [
-        "get",
-        "post",
-        "patch",
-        "delete",
-    ]  # ← blocks PUT and single retrieve
+    http_method_names = ["get", "post", "patch", "delete"]
 
     def get_queryset(self):
         queryset = Event.objects.all()
         filter_type = self.request.query_params.get("filter")
         date_param = self.request.query_params.get("date")
+        today = timezone.now().date()
 
         if filter_type == "today":
-            queryset = queryset.filter(date=date.today())
+            queryset = queryset.filter(start_datetime__date=today)
         elif filter_type == "upcoming":
-            queryset = queryset.filter(date__gte=date.today())
-
+            queryset = queryset.filter(start_datetime__date__gte=today)
         if date_param:
-            queryset = queryset.filter(date=date_param)
+            queryset = queryset.filter(start_datetime__date=date_param)
 
         return queryset
 
@@ -122,7 +117,7 @@ class EventViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @extend_schema(
-        description="Returns all events scheduled for a specific date. Used when clicking a date on the calendar.",
+        description="Returns all events scheduled for a specific date.",
         parameters=[
             OpenApiParameter(
                 name="date",
@@ -146,8 +141,8 @@ class EventViewSet(viewsets.ModelViewSet):
                         {
                             "id": 1,
                             "title": "Staff Training",
-                            "date": "2026-05-14",
-                            "time": "15:00:00",
+                            "start_datetime": "2026-05-14T15:00:00",
+                            "end_datetime": "2026-05-14T17:00:00",
                             "event_type": "meeting",
                             "priority": "medium",
                             "location": "Training Room",
@@ -169,7 +164,7 @@ class EventViewSet(viewsets.ModelViewSet):
                 {"error": "date query param required (YYYY-MM-DD)"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        events = Event.objects.filter(date=date_param)
+        events = Event.objects.filter(start_datetime__date=date_param)
         serializer = self.get_serializer(events, many=True)
         return Response(
             {"date": date_param, "count": events.count(), "events": serializer.data}

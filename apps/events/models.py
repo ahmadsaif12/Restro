@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from apps.misc.models import BaseModel
 
 
@@ -24,20 +25,33 @@ class Event(BaseModel):
         ("completed", "Completed"),
     ]
 
+    RECURRENCE_CHOICES = [
+        ("none", "None"),
+        ("daily", "Daily"),
+        ("weekly", "Weekly"),
+        ("monthly", "Monthly"),
+    ]
+
     title = models.CharField(max_length=255)
-    date = models.DateField()
-    time = models.TimeField()
+    start_datetime = models.DateTimeField()
+    end_datetime = models.DateTimeField(blank=True, null=True)
     event_type = models.CharField(max_length=50, choices=EVENT_TYPE_CHOICES)
     priority = models.CharField(
         max_length=20, choices=PRIORITY_CHOICES, blank=True, null=True
     )
-    location = models.CharField(max_length=255)
+    location = models.CharField(max_length=255, blank=True, null=True)
     expected_attendees = models.PositiveIntegerField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    recurrence = models.CharField(
+        max_length=20, choices=RECURRENCE_CHOICES, default="none"
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
-        ordering = ["date", "time"]
+        ordering = ["start_datetime"]
 
     def __str__(self):
-        return f"{self.title} - {self.date}"
+        return f"{self.title} - {self.start_datetime.date()}"

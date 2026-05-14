@@ -1,0 +1,188 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.08), transparent 24rem),
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    }
+
+    .calendar-import {
+      max-width: 980px;
+      margin: 1.5rem auto;
+      color: #0f172a;
+    }
+
+    .calendar-import__hero,
+    .calendar-import__card {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 1.5rem;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+    }
+
+    .calendar-import__hero {
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.98), rgba(30, 64, 175, 0.95));
+      color: #f8fafc;
+    }
+
+    .calendar-import__hero h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    .calendar-import__hero p {
+      margin: 0.7rem 0 0;
+      max-width: 42rem;
+      color: rgba(248, 250, 252, 0.86);
+      line-height: 1.55;
+    }
+
+    .calendar-import__card {
+      padding: 1.4rem 1.5rem;
+    }
+
+    .calendar-import__grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .calendar-import label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .calendar-import input[type="file"] {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px dashed #94a3b8;
+      border-radius: 1rem;
+      background: #f8fafc;
+    }
+
+    .calendar-import .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      background: #f8fafc;
+    }
+
+    .calendar-import .checkbox-row label {
+      margin: 0;
+    }
+
+    .calendar-import__actions {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+
+    .calendar-import__button,
+    .calendar-import__button:visited {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.9rem;
+      padding: 0.8rem 1rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .calendar-import__button--primary {
+      border: 0;
+      background: #0f766e;
+      color: #fff;
+    }
+
+    .calendar-import__button--secondary {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+    }
+
+    .help,
+    .calendar-import__schema {
+      color: #475569;
+      line-height: 1.55;
+    }
+
+    .calendar-import__schema {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: #f8fafc;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="calendar-import">
+    <div class="calendar-import__hero">
+      <h1>Import events from JSON</h1>
+      <p>Upload a JSON file with event data. Each event should contain title, start_datetime, and optional fields like event_type, priority, status, and recurrence.</p>
+    </div>
+
+    <div class="calendar-import__card">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="calendar-import__grid">
+          {% for field in form %}
+            {% if field.name == "replace_existing_dates" %}
+              <div class="checkbox-row">
+                {{ field }}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              </div>
+              {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+              {{ field.errors }}
+            {% else %}
+              <div>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+                {{ field.errors }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="calendar-import__actions">
+          <button type="submit" class="calendar-import__button calendar-import__button--primary">Import file</button>
+          <a href="{{ changelist_url }}" class="calendar-import__button calendar-import__button--secondary">Back to events</a>
+        </div>
+      </form>
+
+      <div class="calendar-import__schema">[  {
+    "title": "Team Meeting",
+    "start_datetime": "2025-04-15T10:00:00",
+    "end_datetime": "2025-04-15T11:00:00",
+    "event_type": "meeting",
+    "priority": "high",
+    "status": "confirmed",
+    "location": "Conference Room A",
+    "expected_attendees": 10,
+    "recurrence": "none",
+    "description": "Quarterly planning session"
+  },
+  {
+    "title": "Restaurant Reservation",
+    "start_datetime": "2025-04-20T18:30:00",
+    "event_type": "reservation",
+    "priority": "medium",
+    "status": "pending"
+  }
+]</div>
+    </div>
+  </div>
+{% endblock %}

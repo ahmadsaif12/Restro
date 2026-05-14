@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Event
 
 
@@ -9,16 +10,32 @@ class EventSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def validate(self, data):
+        # Required field checks (title & event_type are already handled
+        # by model, but explicit messages are friendlier)
         if not data.get("title"):
             raise serializers.ValidationError({"title": "Event title is required."})
-        if not data.get("date"):
-            raise serializers.ValidationError({"date": "Date is required."})
-        if not data.get("time"):
-            raise serializers.ValidationError({"time": "Time is required."})
+
+        if not data.get("start_datetime"):
+            raise serializers.ValidationError(
+                {"start_datetime": "Start datetime is required."}
+            )
+
         if not data.get("event_type"):
             raise serializers.ValidationError({"event_type": "Event type is required."})
-        if not data.get("location"):
-            raise serializers.ValidationError({"location": "Location is required."})
+
+        start = data.get("start_datetime")
+        end = data.get("end_datetime")
+        if start and end and end <= start:
+            raise serializers.ValidationError(
+                {"end_datetime": "End datetime must be after start datetime."}
+            )
+
+        # Prevent creating events in the past (only on create, not on update)
+        if self.instance is None and start and start < timezone.now():
+            raise serializers.ValidationError(
+                {"start_datetime": "Cannot create an event in the past."}
+            )
+
         return data
 
 
