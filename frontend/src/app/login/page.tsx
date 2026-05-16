@@ -1,14 +1,15 @@
 'use client';
-import React, { useState } from 'react';
+
+import React, { useState, Suspense } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { UtensilsCrossed, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { authService } from '@/lib/api/auth';
 import { useAuthStore } from '@/store/auth-store';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +18,8 @@ export default function LoginPage() {
 
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +28,7 @@ export default function LoginPage() {
     try {
       const data = await authService.login({ email, password });
       setAuth(data.user, data.access, data.refresh);
-      router.push('/dashboard');
+      router.push(callbackUrl);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
     } finally {
@@ -91,3 +94,12 @@ export default function LoginPage() {
     </main>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-slate-50">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
