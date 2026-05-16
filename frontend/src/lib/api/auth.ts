@@ -13,7 +13,7 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
-    await api.post('/autho/logout/');
+    await api.post('/auth/logout/');
   },
 
   async getMe(): Promise<User> {
