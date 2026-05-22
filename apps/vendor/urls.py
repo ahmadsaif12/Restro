@@ -7,7 +7,7 @@ from .views import (
     MarkPaidAPIView,
 )
 
-urlspatterns = [
+urlpatterns = [
     path("api/dashboard/", DashboardAPIView.as_view(), name="dashboard"),
     path("api/vendors/", VendorListAPIView.as_view(), name="vendor-list"),
     path("api/vendors/<int:pk>/", VendorDetailAPIView.as_view(), name="vendor-detail"),

@@ -1,9 +1,6 @@
-from django.shortcuts import render
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import serializers
+from rest_framework import status, serializers
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 
@@ -18,8 +15,9 @@ from .serializers import (
 
 class DashboardAPIView(APIView):
     @extend_schema(
-        summary="dasboard stats",
-        responses={200, DashboardSerializer},
+        summary="Dashboard Stats",
+        responses={200: DashboardSerializer},
+        tags=["Dashboard"],
     )
     def get(self, request):
         vendors = Vendor.objects.all()
@@ -37,47 +35,53 @@ class DashboardAPIView(APIView):
 
 class VendorListAPIView(APIView):
     @extend_schema(
-        summary="vendors list",
+        summary="Vendor List",
         parameters=[
             OpenApiParameter(
                 name="search",
-                descriptions="name,phone,email ",
+                description="Name,email and phone",
                 required=False,
                 type=str,
             )
         ],
-        responses={200, VendorListSerializer(many=True)},
+        responses={200: VendorListSerializer(many=True)},
+        tags=["Vendors"],
     )
     def get(self, request):
         search = request.query_params.get("search", "").strip()
         vendors = Vendor.objects.all()
+
         if search:
             vendors = vendors.filter(
                 Q(vendor_name__icontains=search)
                 | Q(phone_number__icontains=search)
                 | Q(email__icontains=search)
             )
+
         return Response(VendorListSerializer(vendors, many=True).data)
 
 
 class VendorDetailAPIView(APIView):
     @extend_schema(
-        summary="vendors details",
+        summary="Vendor Detail",
         responses={
             200: VendorDetailSerializer,
-            400: inline_serializer(
-                name="VENDORNOTFOUND", fields={"error", serializers.CharField()}
+            404: inline_serializer(
+                name="VendorNotFound",
+                fields={"error": serializers.CharField()},
             ),
         },
+        tags=["Vendors"],
     )
     def get(self, request, pk):
         try:
             vendor = Vendor.objects.get(pk=pk)
         except Vendor.DoesNotExist:
             return Response(
-                {"error": "vendor not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Vendor fela parena."},
+                status=status.HTTP_404_NOT_FOUND,
             )
-        return Response(VendorDetailAPIView(vendor).data)
+        return Response(VendorDetailSerializer(vendor).data)
 
 
 class RecordPurchaseAPIView(APIView):
@@ -104,7 +108,7 @@ class RecordPurchaseAPIView(APIView):
         if serializer.is_valid():
             purchase = serializer.save()
             return Response(
-                {"message": "Purchase recorded", "id": purchase.id},
+                {"message": "Purchase record bhayo!", "id": purchase.id},
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -116,10 +120,12 @@ class MarkPaidAPIView(APIView):
         request=None,
         responses={
             200: inline_serializer(
-                name="MarkPaidResponse", fields={"message": serializers.CharField()}
+                name="MarkPaidResponse",
+                fields={"message": serializers.CharField()},
             ),
             404: inline_serializer(
-                name="PurchaseNotFound", fields={"error": serializers.CharField()}
+                name="PurchaseNotFound",
+                fields={"error": serializers.CharField()},
             ),
         },
         tags=["Purchases"],
@@ -129,9 +135,10 @@ class MarkPaidAPIView(APIView):
             purchase = Purchase.objects.get(pk=pk)
         except Purchase.DoesNotExist:
             return Response(
-                {"error": "Purchase not found."}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Purchase fela parena."},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         purchase.is_paid = True
         purchase.save()
-        return Response({"message": "Purchase paid dpne!"})
+        return Response({"message": "Purchase paid completed"})
