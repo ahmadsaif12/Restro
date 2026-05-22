@@ -39,7 +39,6 @@ class VendorListAPIView(APIView):
         parameters=[
             OpenApiParameter(
                 name="search",
-                description="Name,email and phone",
                 required=False,
                 type=str,
             )
@@ -78,7 +77,7 @@ class VendorDetailAPIView(APIView):
             vendor = Vendor.objects.get(pk=pk)
         except Vendor.DoesNotExist:
             return Response(
-                {"error": "Vendor fela parena."},
+                {"error": "Vendor not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(VendorDetailSerializer(vendor).data)
@@ -108,7 +107,7 @@ class RecordPurchaseAPIView(APIView):
         if serializer.is_valid():
             purchase = serializer.save()
             return Response(
-                {"message": "Purchase record bhayo!", "id": purchase.id},
+                {"message": "Purchase recorded!", "id": purchase.id},
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -135,7 +134,7 @@ class MarkPaidAPIView(APIView):
             purchase = Purchase.objects.get(pk=pk)
         except Purchase.DoesNotExist:
             return Response(
-                {"error": "Purchase fela parena."},
+                {"error": "Purchase not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
