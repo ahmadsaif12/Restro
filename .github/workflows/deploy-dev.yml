@@ -67,4 +67,4 @@ jobs:
         run: |
           set -euo pipefail
           ssh -p "${SSH_PORT:-22}" -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
-            "COMPOSE_PROJECT_NAME=dev-restro bash /var/www/handle-my-restro-projects/deploy-dev.sh"
+            "COMPOSE_PROJECT_NAME=dev-restro bash /home/ubuntu/dev-restro/deploy-dev.sh"
